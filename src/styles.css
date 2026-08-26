@@ -110,16 +110,19 @@ body {
 }
 
 .score-card dl {
-  display: grid;
-  grid-template-columns: repeat(2, auto);
-  gap: 2px 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
   margin: 0;
   font-size: 12.5px;
+  flex: 1;
+  min-width: 0;
 }
 
 .score-card .stat {
   display: flex;
-  gap: 6px;
+  flex-direction: column;
+  gap: 1px;
 }
 
 .score-card dt {

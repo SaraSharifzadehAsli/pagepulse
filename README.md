@@ -16,11 +16,11 @@ npm run build
 
 ## Why this exists
 
-Three and a half years of shipping production frontend at Snapp Food meant accessibility and
-performance regressions were never abstract — a missing form label or a component that re-rendered
-too often was a real bug report. Most of that checking happened by hand, in code review, or after a
-user complaint. This project is that instinct turned into something automatic and reusable: run it
-against a component library and get a report instead of relying on someone noticing.
+Accessibility and performance regressions in a frontend codebase are rarely abstract — a missing
+form label or a component that re-renders too often is a real bug, just one that's easy to miss
+because nothing crashes. That kind of check usually happens by hand, in code review, if it happens
+at all. This project turns that instinct into something automatic and reusable: run it against a
+component library and get a report instead of relying on someone noticing.
 
 It's deliberately scoped small. Rather than trying to audit arbitrary external URLs (which needs a
 server-side fetch, and runs into CORS the moment the target site doesn't cooperate), it audits a
@@ -58,6 +58,24 @@ The three demo components (`src/demos/`) each ship a small number of *intentiona
 issues — a form input with no label, an icon-only button with no accessible name, a duplicate `id` —
 documented in a comment at the top of each file, so the audit's output can be checked against what's
 actually there.
+
+## Design decisions worth knowing about
+
+**Serializing the audits.** All three demo components trigger their audit within milliseconds of
+each other. The first version of this project ran `axe.run()` for each one independently, and two
+of the three would hang forever — axe-core's own docs note it does not support overlapping
+concurrent runs. The fix (`src/audit/accessibility.ts`) is a small promise-based queue: every
+caller's `axe.run()` is chained onto the previous call's completion, so only one audit ever executes
+at a time, regardless of how many components mount together. This is the one part of the project
+that isn't "wire up a library and show the result" — it's a real concurrency bug, diagnosed from a
+symptom (some cards stuck on "auditing…") rather than an error message, and fixed with a queue
+rather than a workaround like an artificial delay.
+
+**Why the scoring logic has zero imports.** `score.ts` never touches the DOM, React, or axe — it's
+plain functions over plain data (issue lists in, a graded score out). That's what makes it possible
+to unit-test the scoring rules directly (`score.test.ts`) without mounting anything or mocking
+axe-core. Everything that *does* need the DOM (`accessibility.ts`, `ComponentPreview.tsx`) is kept
+on the other side of that boundary, and is exercised by running the app itself instead.
 
 ## What's tested, and what isn't
 

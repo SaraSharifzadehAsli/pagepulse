@@ -6,7 +6,7 @@ import type { AccessibilityIssue, PerformanceSample } from "../audit/types";
 interface Props {
   componentId: string;
   Component: ComponentType;
-  onResult: (issues: AccessibilityIssue[], performance: PerformanceSample) => void;
+  onResult: (componentId: string, issues: AccessibilityIssue[], performance: PerformanceSample) => void;
 }
 
 /**
@@ -34,10 +34,16 @@ export function ComponentPreview({ componentId, Component, onResult }: Props) {
 
     reported.current = true;
     const { mount, update } = durations.current;
-    runAccessibilityAudit(containerRef.current).then((issues) => {
-      onResult(issues, { renderMs: mount, rerenderMs: update });
-    });
-  }, [tick, onResult]);
+    runAccessibilityAudit(containerRef.current)
+      .then((issues) => {
+        onResult(componentId, issues, { renderMs: mount, rerenderMs: update });
+      })
+      .catch((error) => {
+        // If this ever fires, it'll show up here instead of hanging the UI
+        // forever on "auditing…" with no explanation.
+        console.error(`Accessibility audit failed for "${componentId}":`, error);
+      });
+  }, [tick, componentId, onResult]);
 
   const handleRender: ProfilerOnRenderCallback = (_id, phase, actualDuration) => {
     if (phase === "mount") durations.current.mount = actualDuration;

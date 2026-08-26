@@ -12,15 +12,21 @@ interface ResultState {
   score: ComponentScore;
 }
 
+const NAMES_BY_ID: Record<string, string> = Object.fromEntries(registry.map((d) => [d.id, d.name]));
+
 export default function App() {
   const [results, setResults] = useState<Record<string, ResultState>>({});
 
-  const makeHandler = useCallback(
-    (componentId: string, componentName: string) =>
-      (issues: AccessibilityIssue[], performance: PerformanceSample) => {
-        const score = scoreComponent({ componentId, componentName, accessibilityIssues: issues, performance });
-        setResults((prev) => ({ ...prev, [componentId]: { issues, performance, score } }));
-      },
+  // A single, identity-stable callback shared by every ComponentPreview —
+  // rather than creating a brand-new closure per item on every render — so
+  // a result from one component doesn't cause the others' effects to
+  // re-run for an unrelated reason.
+  const handleResult = useCallback(
+    (componentId: string, issues: AccessibilityIssue[], performance: PerformanceSample) => {
+      const componentName = NAMES_BY_ID[componentId] ?? componentId;
+      const score = scoreComponent({ componentId, componentName, accessibilityIssues: issues, performance });
+      setResults((prev) => ({ ...prev, [componentId]: { issues, performance, score } }));
+    },
     []
   );
 
@@ -38,7 +44,7 @@ export default function App() {
         {registry.map(({ id, name, Component }) => (
           <article key={id} className="component-slot">
             <h2>{name}</h2>
-            <ComponentPreview componentId={id} Component={Component} onResult={makeHandler(id, name)} />
+            <ComponentPreview componentId={id} Component={Component} onResult={handleResult} />
             {results[id] ? (
               <>
                 <ScoreCard score={results[id].score} performance={results[id].performance} />
