@@ -1,4 +1,5 @@
 import js from "@eslint/js";
+import globals from "globals";
 import tseslint from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
 import reactHooks from "eslint-plugin-react-hooks";
@@ -12,6 +13,10 @@ export default [
     languageOptions: {
       parser: tsParser,
       parserOptions: { ecmaVersion: 2020, sourceType: "module" },
+      // Without this, ESLint has no idea this code runs in a browser — it
+      // treats `document`, `HTMLElement`, `setTimeout`, etc. as unknown
+      // globals and flags every use of them as "not defined".
+      globals: { ...globals.browser },
     },
     plugins: {
       "@typescript-eslint": tseslint,
