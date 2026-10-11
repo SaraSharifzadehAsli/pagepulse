@@ -1,3 +1,5 @@
+**[Live demo →](https://sarasharifzadehasli.github.io/pagepulse/)**
+
 # PagePulse
 
 A small accessibility + render-performance auditor for React component libraries. It mounts a
@@ -39,7 +41,7 @@ synchronous functions over plain data, which is what makes it unit-testable in i
 - **Performance score** treats a 16ms commit (one 60fps frame) as "free," treats 200ms+ as fully
   janky, and scores linearly in between.
 - **Overall score** weights accessibility at 60% and performance at 40% — reflecting that an
-  accessibility failure is usually a harder bug to *notice* than a slow render, even though both are
+  accessibility failure is usually a harder bug to _notice_ than a slow render, even though both are
   real regressions.
 
 These weights and thresholds are judgment calls, not universal constants — the point of keeping the
@@ -54,7 +56,7 @@ reports real commit durations for the initial mount and one forced update. Once 
 issues listed for each component are whatever axe-core actually finds when the component renders in
 your browser.
 
-The three demo components (`src/demos/`) each ship a small number of *intentional* accessibility
+The three demo components (`src/demos/`) each ship a small number of _intentional_ accessibility
 issues — a form input with no label, an icon-only button with no accessible name, a duplicate `id` —
 documented in a comment at the top of each file, so the audit's output can be checked against what's
 actually there.
@@ -74,7 +76,7 @@ rather than a workaround like an artificial delay.
 **Why the scoring logic has zero imports.** `score.ts` never touches the DOM, React, or axe — it's
 plain functions over plain data (issue lists in, a graded score out). That's what makes it possible
 to unit-test the scoring rules directly (`score.test.ts`) without mounting anything or mocking
-axe-core. Everything that *does* need the DOM (`accessibility.ts`, `ComponentPreview.tsx`) is kept
+axe-core. Everything that _does_ need the DOM (`accessibility.ts`, `ComponentPreview.tsx`) is kept
 on the other side of that boundary, and is exercised by running the app itself instead.
 
 ## What's tested, and what isn't
@@ -85,7 +87,7 @@ on the other side of that boundary, and is exercised by running the app itself i
   the rendered-issue state.
 - The axe-core integration and the Profiler-based timing are exercised by running the app itself —
   they depend on a real DOM and real paint timing in a way that's better verified by hand (`npm run
-  dev`) than by a brittle mock.
+dev`) than by a brittle mock.
 
 ## Possible next steps
 
